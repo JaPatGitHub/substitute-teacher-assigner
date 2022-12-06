@@ -56,7 +56,7 @@ Confirm with the user.
 **_Step 6:_** Create a dictionary, say `period_load`. Let the _number of periods_ be the keys and the _list of teachers teaching those many periods_ be the values. ( by calculating the number of times their name appears on the table)
 
 ```python
-period_load = {1: [], 2:[], 3:[], 4:["teacher_x"] 5:["teacher_y", "teacher_z"], ...}
+period_load = {1: [], 2:[], 3:[], 4:["teacher_x"], 5:["teacher_y", "teacher_z"], ...}
 ```
 
 **_Step 7:_** Create another dictionary, say `subsititutes_pool`.
@@ -65,12 +65,12 @@ The structure will be similar to the above dictionary.
 
 This can be done by creating a variable, say `counter`.
 Add key-value pairs from `period_load` to `substitute_pool` with increasing order of keys.
-Every time this happens, double the value of `counter` and add the length of the value list to it.
-Continue the process till the value of `counter > num_substitutes`.
+Every time this happens, add the new combined length of all the lists to `counter`.
+Continue the process till the value of `counter >= num_substitutes`.
 
 ```python
 # Considering num_substitutes = 4
-subst_pool = {4:["teacher_x"] 5:["teacher_y", "teacher_z"]}
+subst_pool = {4:["teacher_x"], 5:["teacher_y", "teacher_z"]}
 ```
 
 **_Step 8:_** Store the maximum value of the keys of the `subst_pool` dictionary in a variale, say `max_subst_load`.
@@ -82,8 +82,8 @@ The first nested list will contain all the periods the teacher is engaged in
 
 ```python
 subst_details = {
-    "teacher_x":[[1, 3, 7, 8], []]
-    "teacher_y":[[1, 4, 6, 7, 8], []]
+    "teacher_x":[[1, 3, 7, 8], []],
+    "teacher_y":[[1, 4, 6, 7, 8], []],
     "teacher_z":[[1, 2, 3, 5, 6], []]
 }
 ```
@@ -94,8 +94,8 @@ Store the value otained in the second nested list.
 ```python
 # Consider period 3 is vacant at some class
 subst_details = {
-    "teacher_x":[[1, 3, 7, 8], [2]]
-    "teacher_y":[[1, 4, 6, 7, 8], [1]]
+    "teacher_x":[[1, 3, 7, 8], [2]],
+    "teacher_y":[[1, 4, 6, 7, 8], [1]],
     "teacher_z":[[1, 2, 3, 5, 6], [0]]
 }
 ```
@@ -108,8 +108,8 @@ However, if the length of the list is greater than the value of `max_subst_load`
 ```python
 # Let period to subst_pool = {4:[] 5:["teacher_y", "teacher_z", "teacher_x"]}e assigned to teacher_x
 subst_details = {
-    "teacher_x":[[1, 3, 7, 8, 2], [2]]
-    "teacher_y":[[1, 4, 6, 7, 8], [1]]
+    "teacher_x":[[1, 3, 7, 8, 2], [2]],
+    "teacher_y":[[1, 4, 6, 7, 8], [1]],
     "teacher_z":[[1, 2, 3, 5, 6], [0]]
 }
 ```
@@ -122,4 +122,4 @@ subst_details = {
 
 **_Step 16:_** Generate a `csv` file from the above table and store it in the records directory.
 
-**_Step 17:_** Ask the user if they wish to notify the substitute teachers using email. If yes, natural join the above tale and the table containing teacher list. Then send email to the teachers who have opted for email notification.
+**_Step 17:_** Ask the user if they wish to notify the substitute teachers using email. If yes, natural join the above table and the table containing teacher list. Then send email to the teachers who have opted for email notification.
