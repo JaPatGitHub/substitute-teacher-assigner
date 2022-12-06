@@ -1,1 +1,1 @@
-use subst_assignment.csv;
+create database subst_assignment;
