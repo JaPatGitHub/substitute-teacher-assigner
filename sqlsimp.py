@@ -71,12 +71,16 @@ def read_table(table_name):
 
 def nullify_val(table_name, values_list):
     columns = read_table(table_name)[0]
+    count = 0
     
     for e in columns:
         for f in values_list:
             qry = "update {0} modify update set {1} = null where {1} = '{2}';".format(table_name, e, f)
             cur.execut(qry)
             con.commit()
+            count += 1
+            
+    return count
             
 def modify_val(table_name, target_column, target_value, reference_column, reference_value):
     #table_list = read_table(table_name)
@@ -115,8 +119,3 @@ def csv_to_sql(csv_file, table_name):
     
     for i in range(1, len(L)):
         insert_values(table_name, L[i])
-    
-            
-                
-                
-            
