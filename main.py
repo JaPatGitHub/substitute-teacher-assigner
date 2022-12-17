@@ -29,6 +29,7 @@ def check_list(tt_pylist, list_pylist):
         return False
     
 def obtain_absentees(teachers_list):
+    print()
     for e in teachers_list:
         print("%5s"%e[0], "%30s"%e[1])
     print()
@@ -113,4 +114,4 @@ if proceed == False:
     sys.exit()
 
 absentees = obtain_absentees(teachers_list)
-num_subst = sql.nullify_val(tt_table_func, absentees)
+sql.nullify_val(tt_table_func, absentees)
