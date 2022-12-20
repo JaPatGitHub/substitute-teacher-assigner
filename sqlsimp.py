@@ -71,11 +71,10 @@ def read_table(table_name):
 
 def nullify_val(table_name, values_list):
     columns = read_table(table_name)[0]
-    count = 0
     
-    for e in columns:
+    for i in range(1, len(columns)):
         for f in values_list:
-            qry = "update {0} modify set {1} = null where {2} = '{3}';".format(table_name, e, e, f)
+            qry = "update {0} set {1} = null where {1} = '{2}';".format(table_name, columns[i], f)
             cur.execute(qry)
             con.commit()
             
