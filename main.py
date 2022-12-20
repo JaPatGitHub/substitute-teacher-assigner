@@ -36,11 +36,24 @@ def obtain_absentees(teachers_list):
     
     absent_no = eval(input("Enter the serial no. of absentees separated by commas (Eg: 2,5,7): "))
     
+    if type(absent_no) == int:
+        absent_no = absent_no,
+    
+    print(absent_no, type(absent_no))
     absentees = []
     for e in absent_no:
         absentees.append(teachers_list[e][1])
     
     return absentees
+
+def count_subst_periods(tt):
+    count = 0
+    for e in tt:
+        for f in e:
+            if tt[e][f] == None:
+                count += 1
+                
+    return count
 
 
         
@@ -115,3 +128,7 @@ if proceed == False:
 
 absentees = obtain_absentees(teachers_list)
 sql.nullify_val(tt_table_func, absentees)
+
+tt_func = sql.read_table(tt_table_func)
+
+num_subst = count_subst_periods(tt_func)
