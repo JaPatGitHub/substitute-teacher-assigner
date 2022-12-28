@@ -48,15 +48,35 @@ def obtain_absentees(teachers_list):
 
 def count_subst_periods(tt):
     count = 0
-    for e in tt:
-        for f in e:
-            if tt[e][f] == None:
+    for i in range(1, len(tt)):
+        for j in range(1, len(tt[i])):
+            if tt[i][j] == None:
                 count += 1
                 
     return count
 
+def find_period_load(tt):
+    teachers = {}
+    period_load = {}
 
-        
+    for i in range(1, len(tt)):
+        for j in range(1, len(tt[i])):
+            teacher = tt[i][j]
+
+            if teacher == None:
+                continue
+
+            elif teacher in teachers.keys():
+                old_load = teachers[teacher]
+                new_load = old_load + 1
+
+                teachers[teacher] = new_load
+                period_load[old_load].pop(teacher)
+                period_load[new_load].append(teacher)
+                
+            else:
+                teachers[teacher] = 1
+                period_load[i].append(teacher)
     
 # __main__
 
