@@ -46,15 +46,36 @@ def obtain_absentees(teachers_list):
     
     return absentees
 
-def count_subst_periods(tt):
+def tt_func_details(tt):
     count = 0
+    teachers_asg = {} # periods the teachers are already assigned
+    period_load = {} # teachers having a particular no. of periods
+
     for i in range(1, len(tt)):
         for j in range(1, len(tt[i])):
+            period = j
+            teacher = tt[i][j]
+            
             if tt[i][j] == None:
                 count += 1
-                
-    return count
+                continue
 
+            elif teacher in teachers_asg.keys():
+                teachers_asg.append(period)
+
+                new_load = len(teachers_asg[teacher])
+                old_load = new_load - 1
+
+                period_load[old_load].pop(teacher)
+                period_load[new_load].append(teacher)
+                
+            else:
+                teachers_asg.append(period)
+                period_load[1].append(teacher)  
+                
+    return teachers_asg, period_load, count
+
+"""
 def find_period_load(tt):
     teachers = {}
     period_load = {}
@@ -77,7 +98,29 @@ def find_period_load(tt):
             else:
                 teachers[teacher] = 1
                 period_load[i].append(teacher)
+
+    return period_load
+"""
     
+def find_subst_pool(period_load, num_subst):
+    subst_teachers = []
+    count = 0
+    subst_pool = {}
+    periods = list(period_load.keys())
+    periods.sort()
+
+    for e in periods:
+        if count > num_subst:
+            break
+        else:
+            subst_pool[e] = period_load[e]
+            subst_teachers.extend(e)
+            count += len(subst_teachers)
+
+    return subst_pool
+
+
+
 # __main__
 
 print("Hello! Welcome to school substitute assigner")
@@ -151,4 +194,4 @@ sql.nullify_val(tt_table_func, absentees)
 
 tt_func = sql.read_table(tt_table_func)
 
-num_subst = count_subst_periods(tt_func)
+# modify this to details: num_subst = count_subst_periods(tt_func)
