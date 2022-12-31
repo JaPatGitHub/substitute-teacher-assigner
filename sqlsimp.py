@@ -79,8 +79,6 @@ def nullify_val(table_name, values_list):
             con.commit()
             
 def modify_val(table_name, target_column, target_value, reference_column, reference_value):
-    #table_list = read_table(table_name)
-    
     qry = "update {0} modify set {1} = '{2}' where {3} = '{4}'".format(table_name, target_column, target_value, reference_column, reference_value)
     cur.execute(qry)
     con.commit()

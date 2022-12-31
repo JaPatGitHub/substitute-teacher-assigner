@@ -2,6 +2,8 @@ import sys
 import sqlsimp as sql
 import datesimp as date
 
+# ! CHECK period in row or column
+# For now, period assumes to be a column and classes a row
 
 def check_list(tt_pylist, list_pylist):
     
@@ -47,21 +49,25 @@ def obtain_absentees(teachers_list):
     return absentees
 
 def tt_func_details(tt):
-    count = 0
     teachers_asg = {} # periods the teachers are already assigned
     period_load = {} # teachers having a particular no. of periods
+    subst_requirement = {'class_index' : [], 'periods' : []}
 
     for i in range(1, len(tt)):
+        period = i # !CHECK
+        teachers_asg[i] = []
+
         for j in range(1, len(tt[i])):
-            period = j
+            class_index = j #!CHECK
             teacher = tt[i][j]
             
             if tt[i][j] == None:
-                count += 1
+                subst_requirement['class_index'].append(class_index)
+                subst_requirement['periods'].append(period)
                 continue
 
             elif teacher in teachers_asg.keys():
-                teachers_asg.append(period)
+                teachers_asg[teacher].append(period)
 
                 new_load = len(teachers_asg[teacher])
                 old_load = new_load - 1
@@ -70,42 +76,17 @@ def tt_func_details(tt):
                 period_load[new_load].append(teacher)
                 
             else:
-                teachers_asg.append(period)
-                period_load[1].append(teacher)  
+                teachers_asg[teacher] = [period]
+                period_load[1].append(teacher)
+
+    num_subst = len(subst_requirement["periods"]) 
                 
-    return teachers_asg, period_load, count
-
-"""
-def find_period_load(tt):
-    teachers = {}
-    period_load = {}
-
-    for i in range(1, len(tt)):
-        for j in range(1, len(tt[i])):
-            teacher = tt[i][j]
-
-            if teacher == None:
-                continue
-
-            elif teacher in teachers.keys():
-                old_load = teachers[teacher]
-                new_load = old_load + 1
-
-                teachers[teacher] = new_load
-                period_load[old_load].pop(teacher)
-                period_load[new_load].append(teacher)
-                
-            else:
-                teachers[teacher] = 1
-                period_load[i].append(teacher)
-
-    return period_load
-"""
+    return teachers_asg, period_load, subst_requirement, num_subst
     
-def find_subst_pool(period_load, num_subst):
+def find_subst_teachers(period_load, num_subst):
     subst_teachers = []
     count = 0
-    subst_pool = {}
+
     periods = list(period_load.keys())
     periods.sort()
 
@@ -113,14 +94,45 @@ def find_subst_pool(period_load, num_subst):
         if count > num_subst:
             break
         else:
-            subst_pool[e] = period_load[e]
             subst_teachers.extend(e)
             count += len(subst_teachers)
 
-    return subst_pool
+    return subst_teachers
 
+def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
+    subst_details = {}
+    class_list = sql.read_table(tt_table)[0]
 
+    for teacher in subst_teachers:
+        subst_details[teacher] = [[teachers_asg[teacher]], []]
+    
+    for i in subst_requirement["periods"]:
+        period = subst_requirement["periods"][i]
+        class_index = subst_requirement["class_index"][i]
+        class_name = class_list[class_index]
 
+        min_dist_list = [] #List of minimimum distance of all teachers from period
+
+        for teacher in subst_details:
+            dist_list = [] #List of ditances from all periods of teachers
+
+            for e in subst_details[teacher][0]:
+                dist = abs(e - period)
+                dist_list.append(dist)
+
+            min_dist = min(dist_list)
+            subst_details[teacher][1] = [min_dist]
+            min_dist_list.append(min_dist)
+        
+        ideal_dist = max(min_dist_list) # Maximum of the list conataining minium distances
+
+        for teacher in subst_details:
+            if subst_details[teacher][1] == ideal_dist:
+                subst = teacher
+                break
+        
+        sql.modify_val(tt_table, class_name, subst, "period", period)
+        
 # __main__
 
 print("Hello! Welcome to school substitute assigner")
@@ -175,6 +187,9 @@ while True:
         sql.drop_table(tt_table_std)
         sql.drop_table(tt_table_func)
         sql.drop_table(teachers_table)
+
+        print()
+        print("Process terminated")
         
         sys.exit()
         
