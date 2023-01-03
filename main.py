@@ -151,8 +151,8 @@ def modify_tt(tt_table):
     while proceed == False:
         try:
             print()
-            period = int(input("Enter the period you want to modify:"))
-            class_name = input("Enter the class you want to modify")
+            period = int(input("Enter the period you want to modify: "))
+            class_name = input("Enter the class you want to modify: ")
             
             if period > len(tt)-1:
                 print("Please enter a value within", len(tt)-1)
@@ -166,9 +166,21 @@ def modify_tt(tt_table):
         except:
             print("Please enter a valid integer")
 
-        teacher = input("Enter the name of teacher you wish to assign")
+        teacher = input("Enter the name of teacher you wish to assign: ")
 
     sql.modify_val(tt_table, class_name, teacher, "period", period)
+
+def compare_tt(tt_table_std, tt_table_func):
+    tt_std = sql.read(tt_table_std)
+    tt_func = sql.read(tt_table_func)
+    subst_table = "{0}{1}{2}subst".format(date.get_year(), date.get_month(), date.get_day())
+
+    sql.create_table(subst_table, ["Period", "Class", "Absent Teacher", "Substitute Teacher"], ["int", "varchar(50)", "varchar(50)", "varchar(50)"])
+
+    for period in tt_std:
+        for class_name in e:
+            if tt_std[period][class_name] != tt_func[period][class_name]:
+                sql.insert_values[subst_table, [period, class_name, tt_std[period][class_name], tt_func[period][class_name]]]
       
 
 # __main__
