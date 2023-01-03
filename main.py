@@ -2,9 +2,6 @@ import sys
 import sqlsimp as sql
 import datesimp as date
 
-# ! CHECK period in row or column
-# For now, period assumes to be a column and classes a row
-
 def check_list(tt_pylist, list_pylist):
     
     teachers = []
@@ -48,17 +45,17 @@ def obtain_absentees(teachers_list):
     
     return absentees
 
-def tt_func_details(tt):
+def tt_details(tt):
     teachers_asg = {} # periods the teachers are already assigned
     period_load = {} # teachers having a particular no. of periods
     subst_requirement = {'class_index' : [], 'periods' : []}
 
     for i in range(1, len(tt)):
-        period = i # !CHECK
-        teachers_asg[i] = []
+        period = i
+        period_load[i] = []
 
         for j in range(1, len(tt[i])):
-            class_index = j #!CHECK
+            class_index = j
             teacher = tt[i][j]
             
             if tt[i][j] == None:
@@ -72,7 +69,7 @@ def tt_func_details(tt):
                 new_load = len(teachers_asg[teacher])
                 old_load = new_load - 1
 
-                period_load[old_load].pop(teacher)
+                period_load[old_load].remove(teacher)
                 period_load[new_load].append(teacher)
                 
             else:
@@ -105,6 +102,11 @@ def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
 
     for teacher in subst_teachers:
         subst_details[teacher] = [[teachers_asg[teacher]], []]
+      
+    max = 0
+    for e in subst_details.values()[0]:
+        if len(e) > max:
+            max = len(e)
     
     for i in subst_requirement["periods"]:
         period = subst_requirement["periods"][i]
@@ -129,10 +131,27 @@ def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
         for teacher in subst_details:
             if subst_details[teacher][1] == ideal_dist:
                 subst = teacher
+                
+                
                 break
         
         sql.modify_val(tt_table, class_name, subst, "period", period)
         
+def show_tt(tt_list):
+    print()
+    
+    for e in tt_std:
+        line = ""
+        for f in e:
+            line += "%10s"%f
+        print(line)
+    
+"""   
+def modify_tt(table_name):
+    tt = sql.read_table(table_name)
+"""
+    
+
 # __main__
 
 print("Hello! Welcome to school substitute assigner")
@@ -166,12 +185,7 @@ Kindly sort out and try again""".format(tt_file, teachers_file))
 tt_std = sql.read_table(tt_table_std)
 teachers_list = sql.read_table(teachers_table)
 
-for e in tt_std:
-    line = ""
-    for f in e:
-        line += "%10s"%f
-    print(line)
-print()
+show_tt(tt_std)
 
 print("""Pleases check if today's standard time table is correct.
 If not, enter NO to terminate this process. Kindly correct the details stored at {0} and restart.
@@ -209,4 +223,5 @@ sql.nullify_val(tt_table_func, absentees)
 
 tt_func = sql.read_table(tt_table_func)
 
-# modify this to details: num_subst = count_subst_periods(tt_func)
+teachers_asg, period_load, subst_requirement, num_subst = tt_details(tt_func)
+
