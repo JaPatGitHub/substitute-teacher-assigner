@@ -181,6 +181,8 @@ def compare_tt(tt_table_std, tt_table_func):
         for class_name in e:
             if tt_std[period][class_name] != tt_func[period][class_name]:
                 sql.insert_values[subst_table, [period, class_name, tt_std[period][class_name], tt_func[period][class_name]]]
+
+    return subst_table
       
 
 # __main__

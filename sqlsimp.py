@@ -113,3 +113,20 @@ def csv_to_sql(csv_file, table_name):
     
     for i in range(1, len(L)):
         insert_values(table_name, L[i])
+
+def sql_to_csv(table_name, csv_file):
+    global con
+    global cur
+
+    L = read_table(table_name)
+
+    for i in L[0]:
+        if type(L[0][i]) == str:
+            L[0][i] = L[0][i].upper()
+
+    for i in L:
+        L[i] = list(L[i])
+
+    with open(csv_file, w):
+        writer = csv.writer(csv_file)
+        writer.writerows(L)
