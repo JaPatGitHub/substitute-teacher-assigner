@@ -2,13 +2,19 @@ import sys
 import sqlsimp as sql
 import datesimp as date
 
-def check_list(tt_list, teacher_list):
-    
+def display_tt(tt_list):
+    for e in tt_list:
+        line = ""
+        for f in e:
+            line += "%10s"%f
+    print(line)
+
+def check_list(tt_list, teachers_list):
     teachers = []
     not_found = []
-    
-    for i in range(1, len(teacher_list)):
-        teacher = teacher_list[i][1].lower()
+
+    for i in range(1, len(teachers_list)):
+        teacher = teachers_list[i][1].lower()
         teachers.append(teacher)
         
     for i in range(1, len(tt_list)):
@@ -101,12 +107,12 @@ def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
     class_list = sql.read_table(tt_table)[0]
 
     for teacher in subst_teachers:
-        subst_details[teacher] = [[teachers_asg[teacher]], []]
+        subst_details[teacher] = [teachers_asg[teacher]]
       
-    max = 0
-    for e in subst_details.values()[0]:
-        if len(e) > max:
-            max = len(e)
+    max_subst_load = 0
+    for e in subst_details.values():
+        if len(e) > max_subst_load:
+            max_subst_load = len(e)
     
     for i in subst_requirement["periods"]:
         period = subst_requirement["periods"][i]
@@ -114,56 +120,56 @@ def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
         class_name = class_list[class_index]
 
         min_dist_list = [] #List of minimimum distance of all teachers from period
+        min_t_list = [] #Teacher list corresponding to above
 
         for teacher in subst_details:
-            dist_list = [] #List of ditances from all periods of teachers
 
-            for e in subst_details[teacher][0]:
+            if len(subst_details[teacher]) > max_subst_load:
+                del subst_details[teacher]
+                continue
+
+            dist_list = [] #List of ditances from all periods of teacher
+
+            for e in subst_details[teacher]:
                 dist = abs(e - period)
                 dist_list.append(dist)
 
             min_dist = min(dist_list)
-            subst_details[teacher][1] = [min_dist]
+            min_t_list.append(teacher)
             min_dist_list.append(min_dist)
         
         ideal_dist = max(min_dist_list) # Maximum of the list conataining minium distances
-
-        for teacher in subst_details:
-            if subst_details[teacher][1] == ideal_dist:
-                subst = teacher
-                break
+        subst_t_index = min_dist_list.index(ideal_dist)
+        subst = min_t_list[subst_t_index]
         
         sql.modify_val(tt_table, class_name, subst, "period", period)
-        
-def show_tt(tt_list):
-    print()
-    
-    for e in tt_std:
-        line = ""
-        for f in e:
-            line += "%10s"%f
-        print(line)
-    
-  
-def modify_tt(table_name):
+
+def modify_tt(tt_table):
     tt = sql.read_table(table_name)
     proceed = False
     
     while proceed == False:
         try:
+            print()
             period = int(input("Enter the period you want to modify:"))
-            class_name = input("Enter the class you want to modify)
+            class_name = input("Enter the class you want to modify")
             
             if period > len(tt)-1:
                 print("Please enter a value within", len(tt)-1)
                 continue
+            
+            if class_name not in tt[0]:
+                print("The class you entered does not exist")
                 
             proceed = True
             
         except:
             print("Please enter a valid integer")
- 
-    class_name = input     
+
+        teacher = input("Enter the name of teacher you wish to assign")
+
+    sql.modify_val(tt_table, class_name, teacher, "period", period)
+      
 
 # __main__
 
@@ -198,8 +204,8 @@ Kindly sort out and try again""".format(tt_file, teachers_file))
 tt_std = sql.read_table(tt_table_std)
 teachers_list = sql.read_table(teachers_table)
 
-show_tt(tt_std)
-
+display_tt(tt_std)
+print()
 print("""Pleases check if today's standard time table is correct.
 If not, enter NO to terminate this process. Kindly correct the details stored at {0} and restart.
 If yes, enter YES to continue""".format(tt_file))
