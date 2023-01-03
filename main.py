@@ -131,8 +131,6 @@ def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
         for teacher in subst_details:
             if subst_details[teacher][1] == ideal_dist:
                 subst = teacher
-                
-                
                 break
         
         sql.modify_val(tt_table, class_name, subst, "period", period)
@@ -146,11 +144,26 @@ def show_tt(tt_list):
             line += "%10s"%f
         print(line)
     
-"""   
+  
 def modify_tt(table_name):
     tt = sql.read_table(table_name)
-"""
+    proceed = False
     
+    while proceed == False:
+        try:
+            period = int(input("Enter the period you want to modify:"))
+            class_name = input("Enter the class you want to modify)
+            
+            if period > len(tt)-1:
+                print("Please enter a value within", len(tt)-1)
+                continue
+                
+            proceed = True
+            
+        except:
+            print("Please enter a valid integer")
+ 
+    class_name = input     
 
 # __main__
 
