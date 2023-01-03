@@ -2,22 +2,22 @@ import sys
 import sqlsimp as sql
 import datesimp as date
 
-def check_list(tt_pylist, list_pylist):
+def check_list(tt_list, teacher_list):
     
     teachers = []
     not_found = []
     
-    for i in range(1, len(list_pylist)):
-        teacher = list_pylist[i][1].lower()
+    for i in range(1, len(teacher_list)):
+        teacher = teacher_list[i][1].lower()
         teachers.append(teacher)
         
-    for i in range(1, len(tt_pylist)):
-        for j in range(1, len(tt_pylist[i])):
-            if tt_pylist[i][j].lower() in teachers:
+    for i in range(1, len(tt_list)):
+        for j in range(1, len(tt_list[i])):
+            if tt_list[i][j].lower() in teachers:
                 continue
             else:
-                if tt_pylist[i][j] not in not_found:
-                    not_found.append(tt_pylist[i][j])
+                if tt_list[i][j] not in not_found:
+                    not_found.append(tt_list[i][j])
                 
     if len(not_found) == 0:
         return True
@@ -224,4 +224,5 @@ sql.nullify_val(tt_table_func, absentees)
 tt_func = sql.read_table(tt_table_func)
 
 teachers_asg, period_load, subst_requirement, num_subst = tt_details(tt_func)
-
+subst_teachers = find_subst_teachers(period_load, num_subst)
+assign_subst(tt_func, subst_requirement, subst_teachers, teachers_asg)
