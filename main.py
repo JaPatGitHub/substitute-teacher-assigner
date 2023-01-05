@@ -7,7 +7,7 @@ def display_tt(tt_list):
         line = ""
         for f in e:
             line += "%10s"%f
-    print(line)
+        print(line)
 
 def check_list(tt_list, teachers_list):
     teachers = []
@@ -43,8 +43,7 @@ def obtain_absentees(teachers_list):
     
     if type(absent_no) == int:
         absent_no = absent_no,
-    
-    print(absent_no, type(absent_no))
+
     absentees = []
     for e in absent_no:
         absentees.append(teachers_list[e][1])
@@ -97,24 +96,25 @@ def find_subst_teachers(period_load, num_subst):
         if count > num_subst:
             break
         else:
-            subst_teachers.extend(e)
+            subst_teachers.extend(period_load[e])
             count += len(subst_teachers)
 
     return subst_teachers
 
 def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
     subst_details = {}
-    class_list = sql.read_table(tt_table)[0]
+    class_list = sql.read_table(tt_table)
+    class_list = class_list[0]
 
     for teacher in subst_teachers:
-        subst_details[teacher] = [teachers_asg[teacher]]
+        subst_details[teacher] = teachers_asg[teacher]
       
     max_subst_load = 0
     for e in subst_details.values():
         if len(e) > max_subst_load:
             max_subst_load = len(e)
     
-    for i in subst_requirement["periods"]:
+    for i in range(len(subst_requirement["periods"])):
         period = subst_requirement["periods"][i]
         class_index = subst_requirement["class_index"][i]
         class_name = class_list[class_index]
@@ -129,7 +129,7 @@ def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
                 continue
 
             dist_list = [] #List of ditances from all periods of teacher
-
+            
             for e in subst_details[teacher]:
                 dist = abs(e - period)
                 dist_list.append(dist)
@@ -142,10 +142,10 @@ def assign_subst(tt_table, subst_requirement, subst_teachers, teachers_asg):
         subst_t_index = min_dist_list.index(ideal_dist)
         subst = min_t_list[subst_t_index]
         
-        sql.modify_val(tt_table, class_name, subst, "period", period)
+        sql.modify_val(tt_table, class_name, subst, "periods", period)
 
 def modify_tt(tt_table):
-    tt = sql.read_table(table_name)
+    tt = sql.read_table(tt_table)
     proceed = False
     
     while proceed == False:
@@ -168,19 +168,18 @@ def modify_tt(tt_table):
 
         teacher = input("Enter the name of teacher you wish to assign: ")
 
-    sql.modify_val(tt_table, class_name, teacher, "period", period)
+    sql.modify_val(tt_table, class_name, teacher, "periods", period)
 
 def compare_tt(tt_table_std, tt_table_func):
-    tt_std = sql.read(tt_table_std)
-    tt_func = sql.read(tt_table_func)
-    subst_table = "{0}{1}{2}subst".format(date.get_year(), date.get_month(), date.get_day())
+    tt_std = sql.read_table(tt_table_std)
+    tt_func = sql.read_table(tt_table_func)
 
-    sql.create_table(subst_table, ["Period", "Class", "Absent Teacher", "Substitute Teacher"], ["int", "varchar(50)", "varchar(50)", "varchar(50)"])
+    sql.create_table(subst_table, ["Period", "Class", "Absent_Teacher", "Substitute_Teacher"], ["int", "varchar(50)", "varchar(50)", "varchar(50)"])
 
-    for period in tt_std:
-        for class_name in e:
+    for period in range(1, len(tt_std)):
+        for class_name in range(1, len(tt_std[period])):
             if tt_std[period][class_name] != tt_func[period][class_name]:
-                sql.insert_values[subst_table, [period, class_name, tt_std[period][class_name], tt_func[period][class_name]]]
+                sql.insert_values(subst_table, [period, tt_std[0][class_name], tt_std[period][class_name], tt_func[period][class_name]])
 
     return subst_table
       
@@ -201,6 +200,25 @@ tt_table_func = "{0}{1}{2}func".format(date.get_year(), date.get_month(), date.g
 
 teachers_file = "standard-details\\list.csv"
 teachers_table = "list{0}{1}{2}".format(date.get_year(), date.get_month(), date.get_day()) # teacher's list
+
+subst_table = "{0}{1}{2}subst".format(date.get_year(), date.get_month(), date.get_day())
+csv_file = f"{date.get_year()}{date.get_month()}{date.get_day()}.csv"
+
+if sql.check_table_exists(subst_table):
+    print("You have already generated substitue list for today")
+    print("Please check is it is stored at", csv_file)
+    
+    ch = input("Enter 'yes' is you wish to regerate. Or press ENTER to exit: ")
+    
+    if ch.lower() in ["yes", "y"]:
+        
+        sql.drop_table(tt_table_std)
+        sql.drop_table(tt_table_func)
+        sql.drop_table(subst_table)
+        sql.drop_table(teachers_table)
+        
+    else:
+        sys.exit()
 
 try:
     sql.csv_to_sql(tt_file, tt_table_std)
@@ -258,4 +276,28 @@ tt_func = sql.read_table(tt_table_func)
 
 teachers_asg, period_load, subst_requirement, num_subst = tt_details(tt_func)
 subst_teachers = find_subst_teachers(period_load, num_subst)
-assign_subst(tt_func, subst_requirement, subst_teachers, teachers_asg)
+assign_subst(tt_table_func, subst_requirement, subst_teachers, teachers_asg)
+
+tt_func = sql.read_table(tt_table_func)
+display_tt(tt_func)
+
+print()
+while True:
+    modify = input("Do you wish to make any modifications: ")
+    
+    if modify.lower() in ["no", "n"]:
+        break
+    
+    elif modify.lower() in ["yes", "y"]:
+        modify_tt(tt_table_func)
+        tt_func = sql.read_table()
+        display_tt(tt_func)
+        
+    else:
+        print("Please enter 'yes' or 'no'")
+        
+subst_table = compare_tt(tt_table_std, tt_table_func)
+sql.sql_to_csv(subst_table, csv_file)
+
+print("Your file has been stored at", csv_file)
+print("Thank you for using this software. Have a nice day!")
