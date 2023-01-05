@@ -202,7 +202,7 @@ teachers_file = "standard-details\\list.csv"
 teachers_table = "list{0}{1}{2}".format(date.get_year(), date.get_month(), date.get_day()) # teacher's list
 
 subst_table = "{0}{1}{2}subst".format(date.get_year(), date.get_month(), date.get_day())
-csv_file = f"{date.get_year()}{date.get_month()}{date.get_day()}.csv"
+csv_file = f"record\\{date.get_year()}{date.get_month()}{date.get_day()}.csv"
 
 if sql.check_table_exists(subst_table):
     print("You have already generated substitue list for today")
