@@ -1,3 +1,4 @@
+
 import sys
 import sqlsimp as sql
 import datesimp as date
@@ -208,7 +209,7 @@ if sql.check_table_exists(subst_table):
     print("You have already generated substitue list for today")
     print("Please check is it is stored at", csv_file)
     
-    ch = input("Enter 'yes' is you wish to regerate. Or press ENTER to exit: ")
+    ch = input("Enter 'yes' is you wish to regenerate. Or press ENTER to exit: ")
     
     if ch.lower() in ["yes", "y"]:
         
@@ -279,6 +280,9 @@ subst_teachers = find_subst_teachers(period_load, num_subst)
 assign_subst(tt_table_func, subst_requirement, subst_teachers, teachers_asg)
 
 tt_func = sql.read_table(tt_table_func)
+print()
+print("This is the final timetable for today:")
+print()
 display_tt(tt_func)
 
 print()
@@ -297,7 +301,14 @@ while True:
         print("Please enter 'yes' or 'no'")
         
 subst_table = compare_tt(tt_table_std, tt_table_func)
+subst_list = sql.read_table(subst_table)
+
 sql.sql_to_csv(subst_table, csv_file)
+
+print("This is the final substitute list:")
+print()
+display_tt(subst_list)
+print()
 
 print("Your file has been stored at", csv_file)
 print("Thank you for using this software. Have a nice day!")
