@@ -1,3 +1,0 @@
-Add thursday and list to standard-details
-
-add "record" folder
