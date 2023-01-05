@@ -16,6 +16,18 @@ def disconnect_sql():
 def use_db(db_name):
     cur.execute("use {0}".format(db_name))
     
+def check_table_exists(table_name):
+    qry = "show tables;"
+    cur.execute(qry)
+    L = cur.fetchall()
+    
+    for e in L:
+        if e[0] == table_name:
+            return True
+    else:
+        return False
+    
+    
 def create_table(table_name, header_list, header_parameters):
    
     if len(header_list) != len (header_parameters):
@@ -79,7 +91,7 @@ def nullify_val(table_name, values_list):
             con.commit()
             
 def modify_val(table_name, target_column, target_value, reference_column, reference_value):
-    qry = "update {0} modify set {1} = '{2}' where {3} = '{4}'".format(table_name, target_column, target_value, reference_column, reference_value)
+    qry = "update {0} set {1} = '{2}' where {3} = '{4}';".format(table_name, target_column, target_value, reference_column, reference_value)
     cur.execute(qry)
     con.commit()
     
@@ -120,13 +132,13 @@ def sql_to_csv(table_name, csv_file):
 
     L = read_table(table_name)
 
-    for i in L[0]:
+    for i in range(len(L[0])):
         if type(L[0][i]) == str:
             L[0][i] = L[0][i].upper()
 
-    for i in L:
+    for i in range(len(L)):
         L[i] = list(L[i])
 
-    with open(csv_file, w):
-        writer = csv.writer(csv_file)
+    with open(csv_file, 'w') as f:
+        writer = csv.writer(f)
         writer.writerows(L)
